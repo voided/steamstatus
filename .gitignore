@@ -118,3 +118,6 @@ cryptopp/
 # misc
 Thumbs.db
 .DS_Store
+
+# asp/web
+PublishProfiles
