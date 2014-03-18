@@ -1,1 +1,60 @@
 ﻿
+
+.container
+{
+    margin: 20px auto;
+
+    width: 500px;
+    text-align: center;
+}
+
+.region
+{
+    text-align: left;
+
+    background-color: #ddd;
+    border-radius: 6px;
+
+    margin-bottom: 20px;
+}
+
+.title, .server
+{
+    padding: 8px;
+}
+
+.server
+{
+    border-top: 1px solid white;
+}
+
+.status
+{
+    float: right;
+}
+
+.status.up
+{
+    color: #339966;
+}
+.status.down
+{
+    color: #e63900;
+}
+
+.flag
+{
+    display: inline-block;
+
+    height: 11px;
+    width: 16px;
+}
+
+.flag.us
+{
+    background: url( "/Content/Flags/us.png" );
+}
+.flag.eu
+{
+    background: url( "/Content/Flags/eu.png" );
+}
