@@ -1,4 +1,4 @@
-﻿namespace StatusServicwe
+﻿namespace StatusService
 {
     partial class Service
     {

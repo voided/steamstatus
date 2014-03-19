@@ -8,7 +8,7 @@ using System.ServiceProcess;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace StatusServicwe
+namespace StatusService
 {
     public partial class Service : ServiceBase
     {
@@ -17,12 +17,21 @@ namespace StatusServicwe
             InitializeComponent();
         }
 
+
+        public void Start( string[] args )
+        {
+            OnStart( args );
+        }
+
+
         protected override void OnStart( string[] args )
         {
+            MonitorThread.Instance.Start();
         }
 
         protected override void OnStop()
         {
+            MonitorThread.Instance.Stop();
         }
     }
 }
