@@ -32,6 +32,16 @@ namespace StatusService
             mainMonitor.Connect();
         }
 
+        public void Stop()
+        {
+            mainMonitor.Disconnect();
+
+            foreach ( var monitor in monitors.Values )
+            {
+                monitor.Disconnect();
+            }
+        }
+
         public void Tick()
         {
             mainMonitor.Tick();

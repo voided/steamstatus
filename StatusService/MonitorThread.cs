@@ -44,7 +44,10 @@ namespace StatusService
             while ( true )
             {
                 if ( !monitorRunning )
+                {
+                    SteamMonitor.Instance.Stop();
                     break;
+                }
 
                 SteamMonitor.Instance.Tick();
             }
