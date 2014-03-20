@@ -60,6 +60,9 @@ namespace SteamStatus.App_Start
                 // you may implement this if you need to restrict visibility of profiling lists on a per request basis 
                 //return true; // all requests are kosher
             //};
+
+            MiniProfiler.Settings.PopupShowTimeWithChildren = true;
+            MiniProfiler.Settings.PopupShowTrivial = true;
         }
 
         public static void PostStart()
@@ -81,10 +84,7 @@ namespace SteamStatus.App_Start
         {
             context.BeginRequest += (sender, e) =>
             {
-                var request = ((HttpApplication)sender).Request;
-                //TODO: By default only local requests are profiled, optionally you can set it up
-                //  so authenticated users are always profiled
-                if (request.IsLocal) { MiniProfiler.Start(); }
+                MiniProfiler.Start();
             };
 
 
