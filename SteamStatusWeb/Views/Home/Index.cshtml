@@ -63,23 +63,24 @@
             
             <div class="server">
 
-                @if ( !string.IsNullOrEmpty( server.Host ) )
-                {
-                    <span>@server.Address [@server.Host]</span>
-                }
-                else
-                {
-                    <span>@server.Address</span>
-                }
+                <span>
+                    @server.Address
 
-                @if ( !string.IsNullOrEmpty( server.Result ) )
-                {
-                    <span class="status @statusClass">@server.Status (@server.Result)</span>
-                }
-                else
-                {
-                    <span class="status @statusClass">@server.Status</span>
-                }
+                    @if ( !string.IsNullOrEmpty( server.Host ) )
+                    {
+                        <span class="host">[@server.Host]</span>
+                    }
+                </span>
+
+                <span class="status @statusClass">
+                    @server.Status
+
+                    @if ( !string.IsNullOrEmpty( server.Result ) )
+                    {
+                        <span>(@server.Result)</span>
+                    }
+                </span>
+
             </div>
         }
         

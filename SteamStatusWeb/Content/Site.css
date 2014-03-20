@@ -1,10 +1,16 @@
 ﻿
 
+body
+{
+    font-family: 'Open Sans', Helvetica, Arial, sans-serif;
+    font-size: 14px;
+}
+
 .container
 {
     margin: 20px auto;
 
-    width: 700px;
+    width: 600px;
     text-align: center;
 }
 
@@ -26,6 +32,11 @@
 .server
 {
     border-top: 1px solid white;
+}
+
+.host
+{
+    color: #777;
 }
 
 .status
