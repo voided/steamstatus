@@ -34,17 +34,22 @@ namespace StatusService
 
         public void Start()
         {
+            Log.WriteInfo( "SteamManager", "Connecting to Redis instance..." );
             redis.Wait( redis.Open() );
 
+            Log.WriteInfo( "SteamManager", "Connecting master monitor to Steam..." );
             mainMonitor.Connect();
         }
 
         public void Stop()
         {
+            Log.WriteInfo( "SteamManager", "Closing connection to Redis, {0} messages to drain...", redis.OutstandingCount );
+
             // we shouldn't have too many queued up messages, so it should
             // be okay to wait to drain the queue
             redis.Wait( redis.CloseAsync( false ) );
 
+            Log.WriteInfo( "SteamManager", "Disconnecting master monitor from Steam..." );
             mainMonitor.Disconnect();
 
             foreach ( var monitor in monitors.Values )
@@ -73,6 +78,12 @@ namespace StatusService
             // handle any CMs that have gone away
             var goneCms = monitors.Keys.Except( cmList );
             HandleGoneCMs( goneCms.ToArray() );
+
+            int numCms = cmList.Count();
+
+            Log.WriteInfo( "SteamManager", "Got new CM list with {0} servers", numCms );
+
+            redis.Strings.Set( 10, "steamstatus:num_servers", numCms );
         }
 
         public void NotifyCMOnline( Monitor monitor )
@@ -141,6 +152,8 @@ namespace StatusService
                 goneMonitor.Disconnect();
 
                 monitors.Remove( goneServer );
+
+                Log.WriteWarn( "SteamManager", "CM {0} has been removed from CM list", goneServer );
             }
         }
     }

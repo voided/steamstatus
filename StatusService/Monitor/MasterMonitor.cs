@@ -18,15 +18,42 @@ namespace StatusService
         }
 
 
+        protected override void OnConnected( SteamClient.ConnectedCallback callback )
+        {
+            Log.WriteInfo( "MasterMonitor", "Connected to Steam!" );
+
+            base.OnConnected( callback );
+        }
+
+        protected override void OnDisconnected( SteamClient.DisconnectedCallback callback )
+        {
+            Log.WriteWarn( "MasterMonitor", "Disconnected from Steam!" );
+
+            base.OnDisconnected( callback );
+        }
+
         protected override void OnLoggedOn( SteamUser.LoggedOnCallback callback )
         {
-            if ( callback.Result == EResult.OK )
+            base.OnLoggedOn( callback );
+
+            if ( callback.Result != EResult.OK )
             {
-                nextRelog = DateTime.Now + TimeSpan.FromMinutes( 30 );
+                Log.WriteWarn( "MasterMonitor", "Unable to logon to Steam: {0}", callback.Result );
+                return;
             }
 
-            base.OnLoggedOn( callback );
+            Log.WriteInfo( "MasterMonitor", "Logged onto Steam!" );
+
+            nextRelog = DateTime.Now + TimeSpan.FromMinutes( 30 );
         }
+
+        protected override void OnLoggedOff( SteamUser.LoggedOffCallback callback )
+        {
+            Log.WriteWarn( "MasterMonitor", "Logged off Steam: {0}", callback.Result );
+
+            base.OnLoggedOff( callback );
+        }
+
 
         protected override void Tick()
         {

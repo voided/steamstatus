@@ -26,11 +26,15 @@ namespace StatusService
 
         protected override void OnStart( string[] args )
         {
+            Log.WriteInfo( "Service", "Starting..." );
+
             MonitorThread.Instance.Start();
         }
 
         protected override void OnStop()
         {
+            Log.WriteInfo( "Service", "Stopping..." );
+
             MonitorThread.Instance.Stop();
         }
     }
