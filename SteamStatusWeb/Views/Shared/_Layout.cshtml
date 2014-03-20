@@ -1,14 +1,20 @@
-﻿<!DOCTYPE html>
+﻿@using StackExchange.Profiling;
+
+<!DOCTYPE html>
 <html>
 
 <head>
+
+    @this.InitClientTimings()
 
     <meta charset="utf-8" />
 
     <title>Steam CM Status</title>
 
-    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans:300,400&amp;subset=latin">
-    <link href="@Url.Content("~/Content/Site.css")" rel="stylesheet" type="text/css" />
+    @this.TimeScript( "Google fonts",
+        @<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans:300,400&amp;subset=latin" /> )
+    @this.TimeScript( "Styles",
+        @<link href="@Url.Content("~/Content/Site.css")" rel="stylesheet" type="text/css" /> )
 
 </head>
 
@@ -17,6 +23,8 @@
     <div class="container">
         @RenderBody()
     </div>
+
+    @MiniProfiler.RenderIncludes()
 
 </body>
 
