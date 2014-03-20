@@ -10,10 +10,13 @@ namespace StatusService
     {
         public static Dictionary<string, byte[]> ToRedisHash( this Dictionary<string, object> input )
         {
-            return input.ToDictionary(
-                kvp => kvp.Key,
-                kvp => Encoding.UTF8.GetBytes( kvp.Value.ToString() )
-            );
+            return input.ToDictionary( kvp => kvp.Key, kvp =>
+            {
+                if ( kvp.Value == null )
+                    return new byte[ 0 ];
+
+                return Encoding.UTF8.GetBytes( kvp.Value.ToString() );
+            } );
         }
     }
 }

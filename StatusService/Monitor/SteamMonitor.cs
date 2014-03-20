@@ -86,6 +86,7 @@ namespace StatusService
             {
                 { "server", monitor.Server },
                 { "status", "Online" },
+                { "result", null },
             };
 
             redis.Hashes.Set( 10, keyName, monitorParams.ToRedisHash() );
@@ -112,6 +113,7 @@ namespace StatusService
             {
                 { "server", monitor.Server },
                 { "status", "Offline" },
+                { "result", null },
             };
 
             if ( result != EResult.Invalid )
