@@ -20,6 +20,17 @@ namespace StatusService
             path = Path.GetDirectoryName( path );
             Directory.SetCurrentDirectory( path );
 
+            AppDomain.CurrentDomain.UnhandledException += ( sender, e ) =>
+            {
+                Log.WriteError( "Program", "Unhandled exception (IsTerm = {1}): {0}", e.ExceptionObject, e.IsTerminating );
+            };
+
+            TaskScheduler.UnobservedTaskException += ( sender, e ) =>
+            {
+                Log.WriteWarn( "Program", "Task exception (Observed = {1}): {0}", e.Exception, e.Observed );
+                e.SetObserved();
+            };
+
             var service = new Service();
 
 #if SERVICE_BUILD
