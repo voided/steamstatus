@@ -1,4 +1,5 @@
 ﻿using BookSleeve;
+using StackExchange.Profiling;
 using SteamStatus.Models;
 using System;
 using System.Collections.Concurrent;
@@ -22,47 +23,50 @@ namespace SteamStatus.Controllers
         {
             var redis = GetRedis();
 
-            string[] cmServers = redis.Wait( redis.Sets.GetAllString( 10, "steamstatus:servers" ) );
+            string[] cmServers = MiniProfiler.Current.Inline( () => redis.Wait( redis.Sets.GetAllString( 10, "steamstatus:servers" ) ), "Get server list" );
 
             var serverBag = new ConcurrentBag<HomeIndexViewModel.Server>();
 
-            Parallel.ForEach( cmServers, cmHost =>
+            using ( MiniProfiler.Current.Step( "Get hashes for servers" ) )
             {
-                string keyName = string.Format( "steamstatus:{0}", cmHost );
-
-                Dictionary<string, string> serverInfo = redis.Wait( redis.Hashes.GetAll( 10, keyName ) )
-                    .ToDictionary( kvp => kvp.Key, kvp => Encoding.UTF8.GetString( kvp.Value ) );
-
-                if ( serverInfo.Count == 0 )
+                Parallel.ForEach( cmServers, cmHost =>
                 {
-                    // if we have no info entries, the key expired and we should remove it from the servers set
-                    redis.Sets.Remove( 10, "steamstatus:servers", cmHost );
+                    string keyName = string.Format( "steamstatus:{0}", cmHost );
 
-                    return;
-                }
+                    Dictionary<string, string> serverInfo = redis.Wait( redis.Hashes.GetAll( 10, keyName ) )
+                        .ToDictionary( kvp => kvp.Key, kvp => Encoding.UTF8.GetString( kvp.Value ) );
 
-                IPEndPoint addr = AddressToEndPoint( cmHost );
+                    if ( serverInfo.Count == 0 )
+                    {
+                        // if we have no info entries, the key expired and we should remove it from the servers set
+                        redis.Sets.Remove( 10, "steamstatus:servers", cmHost );
 
-                var server = new HomeIndexViewModel.Server
-                {
-                    Address = addr,
-                    Status = serverInfo[ "status" ],
-                };
+                        return;
+                    }
 
-                string host;
-                if ( serverInfo.TryGetValue( "host", out host ) )
-                {
-                    server.Host = host;
-                }
+                    IPEndPoint addr = AddressToEndPoint( cmHost );
 
-                string result;
-                if ( serverInfo.TryGetValue( "result", out result ) )
-                {
-                    server.Result = result;
-                }
+                    var server = new HomeIndexViewModel.Server
+                    {
+                        Address = addr,
+                        Status = serverInfo[ "status" ],
+                    };
 
-                serverBag.Add( server );
-            } );
+                    string host;
+                    if ( serverInfo.TryGetValue( "host", out host ) )
+                    {
+                        server.Host = host;
+                    }
+
+                    string result;
+                    if ( serverInfo.TryGetValue( "result", out result ) )
+                    {
+                        server.Result = result;
+                    }
+
+                    serverBag.Add( server );
+                } );
+            }
 
             var model = new HomeIndexViewModel();
 
