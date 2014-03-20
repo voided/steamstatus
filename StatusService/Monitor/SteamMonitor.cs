@@ -15,7 +15,7 @@ namespace StatusService
         public static SteamMonitor Instance { get { return _instance; } }
 
 
-        Monitor mainMonitor;
+        MasterMonitor mainMonitor;
         Dictionary<IPEndPoint, Monitor> monitors;
 
         RedisConnection redis;
@@ -26,7 +26,7 @@ namespace StatusService
             redis = new RedisConnection( "localhost" );
 
             // the main monitor will bootstrap the CM list
-            mainMonitor = new Monitor( null );
+            mainMonitor = new MasterMonitor();
 
             monitors = new Dictionary<IPEndPoint, Monitor>();
         }
@@ -55,11 +55,11 @@ namespace StatusService
 
         public void Tick()
         {
-            mainMonitor.Tick();
+            mainMonitor.DoTick();
 
             foreach ( var monitor in monitors.Values )
             {
-                monitor.Tick();
+                monitor.DoTick();
             }
         }
 
