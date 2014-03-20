@@ -49,12 +49,10 @@ namespace SteamStatus.Controllers
                     Status = serverInfo[ "status" ],
                 };
 
-                try
+                string host;
+                if ( serverInfo.TryGetValue( "host", out host ) )
                 {
-                    server.Host = Dns.GetHostEntry( addr.Address ).HostName;
-                }
-                catch ( SocketException )
-                {
+                    server.Host = host;
                 }
 
                 string result;

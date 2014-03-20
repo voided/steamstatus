@@ -91,7 +91,14 @@ namespace StatusService
             redis.Hashes.Set( 10, keyName, monitorParams.ToRedisHash() );
             redis.Keys.Expire( 10, keyName, (int)TimeSpan.FromMinutes( 30 ).TotalSeconds );
 
-            redis.Sets.Add( 10, "steamstatus:servers", monitor.Server.ToString() ); 
+            redis.Sets.Add( 10, "steamstatus:servers", monitor.Server.ToString() );
+
+            var resolveTask = Task<IPHostEntry>.Factory.FromAsync( Dns.BeginGetHostEntry, Dns.EndGetHostEntry, monitor.Server.Address, null );
+
+            resolveTask.ContinueWith( task =>
+            {
+                redis.Hashes.Set( 10, keyName, "host", task.Result.HostName );
+            }, TaskContinuationOptions.OnlyOnRanToCompletion );
         }
 
         public void NotifyCMOffline( Monitor monitor, EResult result = EResult.Invalid )
