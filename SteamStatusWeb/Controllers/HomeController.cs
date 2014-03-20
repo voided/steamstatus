@@ -33,6 +33,14 @@ namespace SteamStatus.Controllers
                 Dictionary<string, string> serverInfo = redis.Wait( redis.Hashes.GetAll( 10, keyName ) )
                     .ToDictionary( kvp => kvp.Key, kvp => Encoding.UTF8.GetString( kvp.Value ) );
 
+                if ( serverInfo.Count == 0 )
+                {
+                    // if we have no info entries, the key expired and we should remove it from the servers set
+                    redis.Sets.Remove( 10, "steamstatus:servers", cmHost );
+
+                    return;
+                }
+
                 IPEndPoint addr = AddressToEndPoint( cmHost );
 
                 var server = new HomeIndexViewModel.Server
