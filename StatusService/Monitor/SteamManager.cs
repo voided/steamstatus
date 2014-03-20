@@ -114,7 +114,6 @@ namespace StatusService
             {
                 { "server", monitor.Server },
                 { "status", "Offline" },
-                { "result", null },
             };
 
             if ( result != EResult.Invalid )
