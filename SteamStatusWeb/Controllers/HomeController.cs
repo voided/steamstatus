@@ -29,7 +29,12 @@ namespace SteamStatus.Controllers
 
             using ( MiniProfiler.Current.Step( "Get hashes for servers" ) )
             {
-                Parallel.ForEach( cmServers, cmHost =>
+                var parallelOptions = new ParallelOptions
+                {
+                    MaxDegreeOfParallelism = 10,
+                };
+
+                Parallel.ForEach( cmServers, parallelOptions, cmHost =>
                 {
                     string keyName = string.Format( "steamstatus:{0}", cmHost );
 
