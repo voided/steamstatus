@@ -79,11 +79,7 @@ namespace StatusService
             var goneCms = monitors.Keys.Except( cmList );
             HandleGoneCMs( goneCms.ToArray() );
 
-            int numCms = cmList.Count();
-
-            Log.WriteInfo( "SteamManager", "Got new CM list with {0} servers", numCms );
-
-            redis.Strings.Set( 10, "steamstatus:num_servers", numCms );
+            redis.Strings.Set( 10, "steamstatus:num_servers", cmList.Count() );
         }
 
         public void NotifyCMOnline( Monitor monitor )
