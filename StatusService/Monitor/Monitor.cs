@@ -10,19 +10,22 @@ namespace StatusService
 {
     class Monitor
     {
-        IPEndPoint server;
+        public IPEndPoint Server { get; private set; }
+
 
         SteamClient steamClient;
         SteamMonitorUser steamUser;
         CallbackManager callbackMgr;
 
-        DateTime nextConnect;
+        DateTime nextConnect = DateTime.MaxValue;
+        DateTime nextNotify = DateTime.MaxValue;
+
         bool disconnecting;
 
 
         public Monitor( IPEndPoint server )
         {
-            this.server = server;
+            Server = server;
 
             steamClient = new SteamClient();
 
@@ -67,7 +70,21 @@ namespace StatusService
             {
                 nextConnect = DateTime.MaxValue;
 
-                steamClient.Connect( server );
+                steamClient.Connect( Server );
+            }
+
+            if ( DateTime.Now >= nextNotify )
+            {
+                if ( steamClient.IsConnected )
+                {
+                    SteamMonitor.Instance.NotifyCMOnline( this );
+                }
+                else
+                {
+                    SteamMonitor.Instance.NotifyCMOffline( this );
+                }
+
+                nextNotify = DateTime.Now + TimeSpan.FromMinutes( 1 );
             }
         }
 
@@ -76,48 +93,44 @@ namespace StatusService
         {
             if ( callback.Result != EResult.OK )
             {
-                Console.WriteLine( "{0} unable to connect to Steam: {1}", server, callback.Result );
-
-                // todo: notify that this CM is unavailable
-
+                SteamMonitor.Instance.NotifyCMOffline( this, callback.Result );
                 return;
             }
-            
-            Console.WriteLine( "{0} connected to Steam!", server );
 
             steamUser.LogOn();
         }
 
         void OnDisconnected( SteamClient.DisconnectedCallback callback )
         {
-            Console.WriteLine( "{0} disconnected from Steam!", server );
-
             if ( disconnecting )
             {
                 // we're disconnecting this monitor, so we don't want to try to reconnect
+                // or notify that the CM we're connecting to is down
                 return;
             }
 
+            // schedule a reconnect in 10 seconds
             Connect( DateTime.Now + TimeSpan.FromSeconds( 10 ) );
+
+            SteamMonitor.Instance.NotifyCMOffline( this );
         }
 
         void OnLoggedOn( SteamUser.LoggedOnCallback callback )
         {
-            Console.WriteLine( "{0} Logged on to Steam: {1}", server, callback.Result );
-
             if ( callback.Result != EResult.OK )
             {
-                // todo: notify that this CM is unavailable
-
+                SteamMonitor.Instance.NotifyCMOffline( this, callback.Result );
                 return;
             }
+
+            SteamMonitor.Instance.NotifyCMOnline( this );
+
+            nextNotify = DateTime.Now + TimeSpan.FromMinutes( 1 );
         }
 
         void OnLoggedOff( SteamUser.LoggedOffCallback callback )
         {
-            Console.WriteLine( "{0} logged off Steam: {0}", server, callback.Result );
-
-            // notify that this CM is unavailable
+            SteamMonitor.Instance.NotifyCMOffline( this, callback.Result );
         }
 
         void OnCMList( SteamClient.CMListCallback callback )

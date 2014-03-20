@@ -65,6 +65,7 @@
     <Compile Include="Service\MonitorThread.cs" />
     <Compile Include="Monitor\SteamMonitor.cs" />
     <Compile Include="Utils\SteamMonitorUser.cs" />
+    <Compile Include="Utils\Utils.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

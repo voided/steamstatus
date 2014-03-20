@@ -1,4 +1,5 @@
-﻿using SteamKit2;
+﻿using BookSleeve;
+using SteamKit2;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,9 +18,13 @@ namespace StatusService
         Monitor mainMonitor;
         Dictionary<IPEndPoint, Monitor> monitors;
 
+        RedisConnection redis;
+
 
         SteamMonitor()
         {
+            redis = new RedisConnection( "localhost" );
+
             // the main monitor will bootstrap the CM list
             mainMonitor = new Monitor( null );
 
@@ -29,11 +34,17 @@ namespace StatusService
 
         public void Start()
         {
+            redis.Wait( redis.Open() );
+
             mainMonitor.Connect();
         }
 
         public void Stop()
         {
+            // we shouldn't have too many queued up messages, so it should
+            // be okay to wait to drain the queue
+            redis.Wait( redis.CloseAsync( false ) );
+
             mainMonitor.Disconnect();
 
             foreach ( var monitor in monitors.Values )
@@ -62,6 +73,47 @@ namespace StatusService
             // handle any CMs that have gone away
             var goneCms = monitors.Keys.Except( cmList );
             HandleGoneCMs( goneCms.ToArray() );
+        }
+
+        public void NotifyCMOnline( Monitor monitor )
+        {
+            if ( monitor.Server == null )
+                return; // this is the master monitor, which we ignore
+
+            string keyName = string.Format( "steamstatus:{0}", monitor.Server );
+
+            var monitorParams = new Dictionary<string, object>
+            {
+                { "server", monitor.Server },
+                { "status", "Online" },
+            };
+
+            redis.Hashes.Set( 10, keyName, monitorParams.ToRedisHash() );
+            redis.Keys.Expire( 10, keyName, (int)TimeSpan.FromMinutes( 30 ).TotalSeconds );
+
+            redis.Sets.Add( 10, "steamstatus:servers", monitor.Server.ToString() ); 
+        }
+
+        public void NotifyCMOffline( Monitor monitor, EResult result = EResult.Invalid )
+        {
+            if ( monitor.Server == null )
+                return; // this is the master monitor, which we ignore
+
+            string keyName = string.Format( "steamstatus:{0}", monitor.Server );
+
+            var monitorParams = new Dictionary<string, object>
+            {
+                { "server", monitor.Server },
+                { "status", "Offline" },
+            };
+
+            if ( result != EResult.Invalid )
+            {
+                monitorParams[ "result" ] = result;
+            }
+
+            redis.Hashes.Set( 10, keyName, monitorParams.ToRedisHash() );
+            redis.Keys.Expire( 10, keyName, (int)TimeSpan.FromMinutes( 30 ).TotalSeconds );
         }
 
 
