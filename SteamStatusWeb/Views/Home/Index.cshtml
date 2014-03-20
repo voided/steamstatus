@@ -72,7 +72,14 @@
                     <span>@server.Address</span>
                 }
 
-                <span class="status @statusClass">@server.Status</span>
+                @if ( !string.IsNullOrEmpty( server.Result ) )
+                {
+                    <span class="status @statusClass">@server.Status (@server.Result)</span>
+                }
+                else
+                {
+                    <span class="status @statusClass">@server.Status</span>
+                }
             </div>
         }
         
