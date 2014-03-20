@@ -1,9 +1,13 @@
-﻿
+﻿@using SteamStatus.Models;
+
+@model HomeIndexViewModel
+
+
 <h1>Steam CM Status</h1>
 
 <div>
 
-    <div class="region">
+    <!--<div class="region">
 
         <div class="title">
             <span class="flag us"></span>
@@ -44,6 +48,34 @@
             <span class="status down">Offline</span>
         </div>
 
+    </div>-->
+
+    <div class="region">
+
+        <div class="title">
+            <span class="flag"></span>
+            All Servers
+        </div>
+
+        @foreach ( var server in Model.Servers )
+        {
+            var statusClass = server.Status == "Online" ? "up" : "down";
+            
+            <div class="server">
+
+                @if ( !string.IsNullOrEmpty( server.Host ) )
+                {
+                    <span>@server.Address [@server.Host]</span>
+                }
+                else
+                {
+                    <span>@server.Address</span>
+                }
+
+                <span class="status @statusClass">@server.Status</span>
+            </div>
+        }
+        
     </div>
 
 </div>

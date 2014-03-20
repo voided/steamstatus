@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BookSleeve;
+using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
@@ -36,6 +37,12 @@ namespace SteamStatus
 
             RegisterGlobalFilters( GlobalFilters.Filters );
             RegisterRoutes( RouteTable.Routes );
+
+
+            var redis = new RedisConnection( "localhost" );
+            redis.Wait( redis.Open() );
+
+            Application[ "RedisConnection" ] = redis;
         }
     }
 }
