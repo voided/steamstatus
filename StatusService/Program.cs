@@ -27,7 +27,7 @@ namespace StatusService
 
             TaskScheduler.UnobservedTaskException += ( sender, e ) =>
             {
-                Log.WriteWarn( "Program", "Task exception (Observed = {1}): {0}", e.Exception, e.Observed );
+                // set the exception as observed, so we don't bring down the process
                 e.SetObserved();
             };
 
