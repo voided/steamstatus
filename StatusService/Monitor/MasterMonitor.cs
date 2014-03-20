@@ -16,6 +16,7 @@ namespace StatusService
         {
         }
 
+
         protected override void OnLoggedOn( SteamKit2.SteamUser.LoggedOnCallback callback )
         {
             nextRelog = DateTime.Now + TimeSpan.FromMinutes( 30 );

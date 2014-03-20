@@ -77,9 +77,6 @@ namespace StatusService
 
         public void NotifyCMOnline( Monitor monitor )
         {
-            if ( monitor.Server == null )
-                return; // this is the master monitor, which we ignore
-
             string keyName = string.Format( "steamstatus:{0}", monitor.Server );
 
             var monitorParams = new Dictionary<string, object>
@@ -104,9 +101,6 @@ namespace StatusService
 
         public void NotifyCMOffline( Monitor monitor, EResult result = EResult.Invalid )
         {
-            if ( monitor.Server == null )
-                return; // this is the master monitor, which we ignore
-
             string keyName = string.Format( "steamstatus:{0}", monitor.Server );
 
             var monitorParams = new Dictionary<string, object>
