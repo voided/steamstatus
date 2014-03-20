@@ -20,7 +20,10 @@ namespace SteamStatus.Models
         }
 
 
+        public int NumServers { get; set; }
+
         public List<Server> Servers { get; set; }
+
 
         public HomeIndexViewModel()
         {

@@ -23,6 +23,8 @@ namespace SteamStatus.Controllers
         {
             var redis = GetRedis();
 
+            var numServersTask = redis.Strings.GetInt64( 10, "steamstatus:num_servers" );
+
             string[] cmServers = MiniProfiler.Current.Inline( () => redis.Wait( redis.Sets.GetAllString( 10, "steamstatus:servers" ) ), "Get server list" );
 
             var serverBag = new ConcurrentBag<HomeIndexViewModel.Server>();
@@ -74,6 +76,11 @@ namespace SteamStatus.Controllers
             }
 
             var model = new HomeIndexViewModel();
+
+            using ( MiniProfiler.Current.Step( "Get num servers" ) )
+            {
+                model.NumServers = (int)redis.Wait( numServersTask );
+            }
 
             model.Servers.AddRange( serverBag.OrderBy( s => s.Address.ToString() ) );
 
