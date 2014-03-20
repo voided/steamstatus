@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,12 +10,15 @@ namespace StatusService
 {
     class MasterMonitor : BaseMonitor
     {
+        List<IPEndPoint> lastCmList;
+
         DateTime nextRelog = DateTime.MaxValue;
 
 
         public MasterMonitor()
             : base( null )
         {
+            lastCmList = new List<IPEndPoint>();
         }
 
 
@@ -52,6 +56,22 @@ namespace StatusService
             Log.WriteWarn( "MasterMonitor", "Logged off Steam: {0}", callback.Result );
 
             base.OnLoggedOff( callback );
+        }
+
+        protected override void OnCMList( SteamClient.CMListCallback callback )
+        {
+            List<IPEndPoint> sortedServers = callback.Servers
+                .OrderBy( s => s.ToString() )
+                .ToList();
+
+            if ( !lastCmList.SequenceEqual( sortedServers ) )
+            {
+                Log.WriteInfo( "MasterMonitor", "Got new CM list containing {0} servers", sortedServers.Count );
+
+                lastCmList = sortedServers;
+            }
+
+            base.OnCMList( callback );
         }
 
 
