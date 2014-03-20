@@ -73,7 +73,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Service\MonitorThread.cs" />
-    <Compile Include="Monitor\SteamMonitor.cs" />
+    <Compile Include="Monitor\SteamManager.cs" />
     <Compile Include="Utils\SteamMonitorUser.cs" />
     <Compile Include="Utils\Utils.cs" />
   </ItemGroup>

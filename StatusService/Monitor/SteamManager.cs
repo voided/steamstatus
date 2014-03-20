@@ -9,10 +9,10 @@ using System.Threading.Tasks;
 
 namespace StatusService
 {
-    class SteamMonitor
+    class SteamManager
     {
-        static SteamMonitor _instance = new SteamMonitor();
-        public static SteamMonitor Instance { get { return _instance; } }
+        static SteamManager _instance = new SteamManager();
+        public static SteamManager Instance { get { return _instance; } }
 
 
         MasterMonitor mainMonitor;
@@ -21,7 +21,7 @@ namespace StatusService
         RedisConnection redis;
 
 
-        SteamMonitor()
+        SteamManager()
         {
             redis = new RedisConnection( "localhost" );
 

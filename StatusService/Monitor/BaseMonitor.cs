@@ -109,7 +109,7 @@ namespace StatusService
 
         protected virtual void OnCMList( SteamClient.CMListCallback callback )
         {
-            SteamMonitor.Instance.UpdateCMList( callback.Servers );
+            SteamManager.Instance.UpdateCMList( callback.Servers );
         }
     }
 }

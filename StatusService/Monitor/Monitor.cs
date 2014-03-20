@@ -23,7 +23,7 @@ namespace StatusService
         {
             if ( callback.Result != EResult.OK )
             {
-                SteamMonitor.Instance.NotifyCMOffline( this, callback.Result );
+                SteamManager.Instance.NotifyCMOffline( this, callback.Result );
                 return;
             }
 
@@ -37,7 +37,7 @@ namespace StatusService
             if ( !IsDisconnecting )
             {
                 // if we're not forcibly disconnecting this instance, notify that the CM is offline
-                SteamMonitor.Instance.NotifyCMOffline( this );
+                SteamManager.Instance.NotifyCMOffline( this );
             }
         }
 
@@ -47,11 +47,11 @@ namespace StatusService
 
             if ( callback.Result != EResult.OK )
             {
-                SteamMonitor.Instance.NotifyCMOffline( this, callback.Result );
+                SteamManager.Instance.NotifyCMOffline( this, callback.Result );
                 return;
             }
 
-            SteamMonitor.Instance.NotifyCMOnline( this );
+            SteamManager.Instance.NotifyCMOnline( this );
 
             nextNotify = DateTime.Now + TimeSpan.FromMinutes( 1 );
         }
@@ -60,7 +60,7 @@ namespace StatusService
         {
             base.OnLoggedOff( callback );
 
-            SteamMonitor.Instance.NotifyCMOffline( this, callback.Result );
+            SteamManager.Instance.NotifyCMOffline( this, callback.Result );
         }
 
 
@@ -73,11 +73,11 @@ namespace StatusService
             {
                 if ( Client.IsConnected )
                 {
-                    SteamMonitor.Instance.NotifyCMOnline( this );
+                    SteamManager.Instance.NotifyCMOnline( this );
                 }
                 else
                 {
-                    SteamMonitor.Instance.NotifyCMOffline( this );
+                    SteamManager.Instance.NotifyCMOffline( this );
                 }
 
                 nextNotify = DateTime.Now + TimeSpan.FromMinutes( 1 );

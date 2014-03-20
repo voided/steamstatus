@@ -39,17 +39,17 @@ namespace StatusService
 
         void MonitorLoop()
         {
-            SteamMonitor.Instance.Start();
+            SteamManager.Instance.Start();
 
             while ( true )
             {
                 if ( !monitorRunning )
                 {
-                    SteamMonitor.Instance.Stop();
+                    SteamManager.Instance.Stop();
                     break;
                 }
 
-                SteamMonitor.Instance.Tick();
+                SteamManager.Instance.Tick();
             }
         }
     }
