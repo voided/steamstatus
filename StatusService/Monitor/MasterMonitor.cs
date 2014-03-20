@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SteamKit2;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,9 +18,12 @@ namespace StatusService
         }
 
 
-        protected override void OnLoggedOn( SteamKit2.SteamUser.LoggedOnCallback callback )
+        protected override void OnLoggedOn( SteamUser.LoggedOnCallback callback )
         {
-            nextRelog = DateTime.Now + TimeSpan.FromMinutes( 30 );
+            if ( callback.Result == EResult.OK )
+            {
+                nextRelog = DateTime.Now + TimeSpan.FromMinutes( 30 );
+            }
 
             base.OnLoggedOn( callback );
         }
