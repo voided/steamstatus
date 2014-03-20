@@ -52,19 +52,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Log.cs" />
-    <Compile Include="Monitor.cs" />
-    <Compile Include="Service.cs">
+    <Compile Include="Utils\Log.cs" />
+    <Compile Include="Monitor\Monitor.cs" />
+    <Compile Include="Service\Service.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Service.Designer.cs">
+    <Compile Include="Service\Service.Designer.cs">
       <DependentUpon>Service.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="MonitorThread.cs" />
-    <Compile Include="SteamMonitor.cs" />
-    <Compile Include="SteamMonitorUser.cs" />
+    <Compile Include="Service\MonitorThread.cs" />
+    <Compile Include="Monitor\SteamMonitor.cs" />
+    <Compile Include="Utils\SteamMonitorUser.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
