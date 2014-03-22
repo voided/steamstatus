@@ -95,8 +95,11 @@ namespace StatusService
                 return;
             }
 
-            // schedule a reconnect in 10 seconds
-            Connect( DateTime.Now + TimeSpan.FromSeconds( 10 ) );
+            // schedule a reconnect in a random-ish amount of seconds.
+            // this should spread out reconnects when all our monitors drop due to connectivity issues
+
+            int numSeconds = new Random().Next( 10, 30 );
+            Connect( DateTime.Now + TimeSpan.FromSeconds( numSeconds ) );
         }
 
         protected virtual void OnLoggedOn( SteamUser.LoggedOnCallback callback )
