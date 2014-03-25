@@ -12,8 +12,6 @@ namespace StatusService
     {
         List<IPEndPoint> lastCmList;
 
-        DateTime nextRelog = DateTime.MaxValue;
-
 
         public MasterMonitor()
             : base( null )
@@ -48,7 +46,7 @@ namespace StatusService
 
             Log.WriteInfo( "MasterMonitor", "Logged onto Steam!" );
 
-            nextRelog = DateTime.Now + TimeSpan.FromMinutes( 30 );
+            Connect( DateTime.Now + TimeSpan.FromMinutes( 30 ) );
         }
 
         protected override void OnLoggedOff( SteamUser.LoggedOffCallback callback )
@@ -72,22 +70,6 @@ namespace StatusService
             }
 
             base.OnCMList( callback );
-        }
-
-
-        protected override void Tick()
-        {
-            base.Tick();
-
-            if ( DateTime.Now >= nextRelog )
-            {
-                if ( Client.IsConnected )
-                {
-                    Client.Disconnect();
-                }
-
-                nextRelog = DateTime.Now + TimeSpan.FromMinutes( 30 );
-            }
         }
     }
 }
