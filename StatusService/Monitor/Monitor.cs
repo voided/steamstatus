@@ -54,6 +54,13 @@ namespace StatusService
             SteamManager.Instance.NotifyCMOnline( this );
 
             nextNotify = DateTime.Now + TimeSpan.FromMinutes( 1 );
+
+            DateTime nextReconnect = DateTime.Now
+                + TimeSpan.FromMinutes( 30 )
+                + TimeSpan.FromMinutes( new Random().NextDouble() * 5 );
+
+            // schedule a random reconnect in anywhere from 30 to 35 minutes
+            Connect( nextReconnect );
         }
 
         protected override void OnLoggedOff( SteamUser.LoggedOffCallback callback )
