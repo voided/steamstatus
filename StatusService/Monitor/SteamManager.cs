@@ -1,9 +1,11 @@
 ﻿using BookSleeve;
 using SteamKit2;
+using SteamShared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -39,6 +41,9 @@ namespace StatusService
 
             Log.WriteInfo( "SteamManager", "Connecting master monitor to Steam..." );
             mainMonitor.Connect();
+
+            Log.WriteInfo( "SteamManager", "Clearing stale servers" );
+            redis.Keys.Remove( 10, "steamstatus:servers" );
         }
 
         public void Stop()
@@ -82,47 +87,50 @@ namespace StatusService
             redis.Strings.Set( 10, "steamstatus:num_servers", cmList.Count() );
         }
 
-        public void NotifyCMOnline( Monitor monitor )
+        public async void NotifyCMOnline( Monitor monitor )
         {
-            string keyName = string.Format( "steamstatus:{0}", monitor.Server );
+            IPHostEntry dnsEntry = null;
 
-            var monitorParams = new Dictionary<string, object>
+            try
             {
-                { "server", monitor.Server },
-                { "status", "Online" },
-                { "result", null },
+                dnsEntry = await Task<IPHostEntry>.Factory.FromAsync( Dns.BeginGetHostEntry, Dns.EndGetHostEntry, monitor.Server.Address, null );
+            }
+            catch ( SocketException )
+            {
+                // not the end of the world if we can't reverse resolve the hostname
+            }
+
+            string keyName = monitor.Server.ToString();
+
+            var serverInfo = new ServerInfo
+            {
+                Server = keyName,
+                IsOnline = true,
+                Result = null,
             };
 
-            redis.Hashes.Set( 10, keyName, monitorParams.ToRedisHash() );
-            redis.Keys.Expire( 10, keyName, (int)TimeSpan.FromMinutes( 30 ).TotalSeconds );
-
-            redis.Sets.Add( 10, "steamstatus:servers", monitor.Server.ToString() );
-
-            var resolveTask = Task<IPHostEntry>.Factory.FromAsync( Dns.BeginGetHostEntry, Dns.EndGetHostEntry, monitor.Server.Address, null );
-
-            resolveTask.ContinueWith( task =>
+            if ( dnsEntry != null )
             {
-                redis.Hashes.Set( 10, keyName, "host", task.Result.HostName );
-            }, TaskContinuationOptions.OnlyOnRanToCompletion );
+                serverInfo.Host = dnsEntry.HostName;
+            }
+
+            var task = redis.Hashes.Set( 10, "steamstatus:servers", keyName, serverInfo.SerializeToBytes() );
         }
 
-        public void NotifyCMOffline( Monitor monitor, EResult result = EResult.Invalid )
+        public async void NotifyCMOffline( Monitor monitor, EResult result = EResult.Invalid )
         {
-            string keyName = string.Format( "steamstatus:{0}", monitor.Server );
+            string keyName = monitor.Server.ToString();
 
-            var monitorParams = new Dictionary<string, object>
-            {
-                { "server", monitor.Server },
-                { "status", "Offline" },
-            };
+            ServerInfo serverInfo = ServerInfo.DeserializeFromBytes( await redis.Hashes.Get( 10, "steamstatus:servers", keyName ) );
+
+            serverInfo.IsOnline = false;
 
             if ( result != EResult.Invalid )
             {
-                monitorParams[ "result" ] = result;
+                serverInfo.Result = result.ToString();
             }
 
-            redis.Hashes.Set( 10, keyName, monitorParams.ToRedisHash() );
-            redis.Keys.Expire( 10, keyName, (int)TimeSpan.FromMinutes( 30 ).TotalSeconds );
+            var task = redis.Hashes.Set( 10, "steamstatus:servers", keyName, serverInfo.SerializeToBytes() );
         }
 
 

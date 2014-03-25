@@ -89,6 +89,12 @@
       <DependentUpon>Service.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SteamShared\SteamShared.csproj">
+      <Project>{4d00b886-8853-4d54-923f-9e7a8c96866a}</Project>
+      <Name>SteamShared</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

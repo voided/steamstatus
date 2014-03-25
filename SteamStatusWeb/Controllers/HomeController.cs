@@ -1,8 +1,8 @@
 ﻿using BookSleeve;
 using StackExchange.Profiling;
+using SteamShared;
 using SteamStatus.Models;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -25,76 +25,25 @@ namespace SteamStatus.Controllers
 
             var numServersTask = redis.Strings.GetInt64( 10, "steamstatus:num_servers" );
 
-            string[] cmServers = MiniProfiler.Current.Inline( () => redis.Wait( redis.Sets.GetAllString( 10, "steamstatus:servers" ) ), "Get server list" );
-
-            var serverBag = new ConcurrentBag<HomeIndexViewModel.Server>();
+            var model = new HomeIndexViewModel();
 
             using ( MiniProfiler.Current.Step( "Get hashes for servers" ) )
             {
-                var parallelOptions = new ParallelOptions
-                {
-                    MaxDegreeOfParallelism = 10,
-                };
+                Dictionary<string, byte[]> serverInfoDictionary = redis.Wait( redis.Hashes.GetAll( 10, "steamstatus:servers" ) );
 
-                Parallel.ForEach( cmServers, parallelOptions, cmHost =>
-                {
-                    string keyName = string.Format( "steamstatus:{0}", cmHost );
+                var serverInfos = serverInfoDictionary
+                    .Select( kvp => ServerInfo.DeserializeFromBytes( kvp.Value ) )
+                    .OrderBy( s => s.Server );
 
-                    Dictionary<string, string> serverInfo = redis.Wait( redis.Hashes.GetAll( 10, keyName ) )
-                        .ToDictionary( kvp => kvp.Key, kvp => Encoding.UTF8.GetString( kvp.Value ) );
-
-                    if ( serverInfo.Count == 0 )
-                    {
-                        // if we have no info entries, the key expired and we should remove it from the servers set
-                        redis.Sets.Remove( 10, "steamstatus:servers", cmHost );
-
-                        return;
-                    }
-
-                    IPEndPoint addr = AddressToEndPoint( cmHost );
-
-                    var server = new HomeIndexViewModel.Server
-                    {
-                        Address = addr,
-                        Status = serverInfo[ "status" ],
-                    };
-
-                    string host;
-                    if ( serverInfo.TryGetValue( "host", out host ) )
-                    {
-                        server.Host = host;
-                    }
-
-                    string result;
-                    if ( serverInfo.TryGetValue( "result", out result ) )
-                    {
-                        server.Result = result;
-                    }
-
-                    serverBag.Add( server );
-                } );
+                model.Servers.AddRange( serverInfos );
             }
-
-            var model = new HomeIndexViewModel();
 
             using ( MiniProfiler.Current.Step( "Get num servers" ) )
             {
                 model.NumServers = (int)redis.Wait( numServersTask );
             }
 
-            model.Servers.AddRange( serverBag.OrderBy( s => s.Address.ToString() ) );
-
             return View( model );
-        }
-
-        IPEndPoint AddressToEndPoint( string address )
-        {
-            string[] addressParts = address.Split( ':' );
-
-            IPAddress ipAddr = IPAddress.Parse( addressParts[ 0 ] );
-            int port = int.Parse( addressParts[ 1 ] );
-
-            return new IPEndPoint( ipAddr, port );
         }
 
         RedisConnection GetRedis()

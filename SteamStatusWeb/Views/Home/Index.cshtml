@@ -63,12 +63,12 @@
 
         @foreach ( var server in Model.Servers )
         {
-            var statusClass = server.Status == "Online" ? "up" : "down";
+            var statusClass = server.IsOnline ? "up" : "down";
             
             <div class="server">
 
                 <span>
-                    @server.Address
+                    @server.Server
 
                     @if ( !string.IsNullOrEmpty( server.Host ) )
                     {
@@ -77,7 +77,14 @@
                 </span>
 
                 <span class="status @statusClass">
-                    @server.Status
+                    @if ( server.IsOnline )
+                    {
+                        @:Online
+                    }
+                    else
+                    {
+                        @:Offline
+                    }
 
                     @if ( !string.IsNullOrEmpty( server.Result ) )
                     {

@@ -1,4 +1,5 @@
 ﻿using SteamKit2;
+using SteamShared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,25 +10,14 @@ namespace SteamStatus.Models
 {
     public class HomeIndexViewModel
     {
-        public class Server
-        {
-            public IPEndPoint Address { get; set; }
-            public string Host { get; set; }
-
-            public string Status { get; set; }
-
-            public string Result { get; set; }
-        }
-
-
         public int NumServers { get; set; }
 
-        public List<Server> Servers { get; set; }
+        public List<ServerInfo> Servers { get; set; }
 
 
         public HomeIndexViewModel()
         {
-            Servers = new List<Server>();
+            Servers = new List<ServerInfo>();
         }
     }
 }
